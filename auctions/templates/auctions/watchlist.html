@@ -1,0 +1,12 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+  <h2>Watchlist</h2>
+  {% if saved_items %}
+    {% for item in saved_items %}
+      {% include "auctions/displayitems.html" with items=item.item_id%}
+    {% endfor %}
+  {% else %}
+    {{ mensagem }}
+  {% endif %}
+{% endblock %}

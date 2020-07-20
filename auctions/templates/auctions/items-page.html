@@ -1,0 +1,51 @@
+{% extends "auctions/layout.html" %}
+{% load bootstrap %}
+
+{% block body %}
+  {% for items in items %}
+    <h2>Listing: {{ items.item }} </h2>
+    <h4>$50</h4>
+    <h6>Description:</h6>
+    <small>
+      <div class="text-justify" style="padding-left: 12px">
+        <p>{{ items.description }}</p>
+      </div>
+    </small>
+    {% if user.is_authenticated  %}
+      <form method='post' action="{% url 'adding_bid' title=items.item id=items.id %}">
+        {% csrf_token %}
+        {{ BidForm|bootstrap }}
+        <button type="submit" class="btn btn-outline-primary" name="button">Place Bid</button>
+      </form>
+    {% endif %}
+    <br>
+    Details:
+    <ul>
+      <li>Listed by: {{ items.seller }}</li>
+      <li>Category: </li>
+      <li>Initial Value: ${{ items.min_bid }}</li>
+      <li>Created: </li>
+      {% if items.active == True %}
+        <li>Active</li>
+      {% else %}
+        <li>Closed</li>
+      {% endif %}
+    </ul>
+    <p>Comments</p>
+    {% for comment in comments %}
+    <div class="card border-dark mb-3">
+      <div class="card-header">{{ comment.usuario }}</div>
+      <div class="card-body text-dark">
+        <p class="card-text">{{ comment.comentarios }}</p>
+      </div>
+    </div>
+    {% endfor %}
+    {% if user.is_authenticated  %}
+      <form method='post'action="{% url 'adding_comment' title=items.item id=items.id%}" >
+        {% csrf_token %}
+        {{ CommentForm }}<br>
+        <button type="submit" class="btn btn-outline-primary" name="button">Submit Comment</button>
+      </form>
+    {% endif %}
+  {% endfor %}
+{% endblock %}
