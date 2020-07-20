@@ -4,7 +4,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.core.files.storage import FileSystemStorage
 from django.shortcuts import render
 from django.urls import reverse
-from .forms import Listing_Form, BidForm, CommentsForm, Upload_Image
+from .forms import Listing_Form, BidForm, CommentsForm
 import datetime
 
 from .models import User, Auction, Bids, Comments, Watchlist
@@ -73,17 +73,18 @@ def create_list(request):
             title = form.cleaned_data["title"]
             description = form.cleaned_data["description"]
             init_bid = form.cleaned_data["init_bid"]
+            image = request.FILES['image']
             seller = request.user
             listing = Auction.objects.create(
                 seller = seller,
                 item = title,
                 description = description,
-                min_bid = init_bid
+                min_bid = init_bid,
+                image = image
             )
-            return render(request, "auctions/items-page.html")
+            return HttpResponseRedirect(reverse('index'))
     return render(request, "auctions/new-listing.html", {
-        "form": Listing_Form(),
-        "image": Upload_Image()
+        "form": Listing_Form()
     })
 
 
@@ -94,26 +95,13 @@ def items_page(request, title, id):
     author = User.objects.filter(pk__in=seller)
     if author[0] == request.user:
         edit = True
-        bid = Bids.objects.filter(item_id = filter)
+        log_bids = Bids.objects.filter(item_id = filter)
     return render(request, "auctions/items-page.html", {
         "BidForm": BidForm(),
         "CommentForm": CommentsForm(),
         "comments": Comments.objects.filter(item_id = filter),
         "items": details
     })
-
-
-def upload_image(request):
-    if request.method == "POST":
-        form = UploadFileForm(request.POST, request.FILES)
-        if form.is_valid():
-            uploaded_file = request.FILES['file']
-            fs = FileSystemStorage()
-            fs.save(uploaded_file.name, uploadedfile)
-            return HttpResponseRedirect('/success/url/')
-        else:
-            form = UploadFileForm()
-        return render(request, 'upload.html', {'form': form})
 
 
 def adding_comment(request, title, id):
@@ -132,16 +120,14 @@ def adding_comment(request, title, id):
 
 def adding_bid(request, title, id):
     filter = Auction.objects.get(id = id)
-    print(filter.min_bid)
     if request.method == "POST":
-        form = BidForm(request.POST, 'teste')
+        form = BidForm(request.POST)
         if form.is_valid():
             bid_value = form.cleaned_data["bid_value"]
             Bids.objects.create(
                 buyer = request.user,
                 bid_value = bid_value,
                 item_id = filter,
-                date = datetime.date.today()
             )
     return HttpResponseRedirect(reverse("items_page", args=(title, id,)))
 

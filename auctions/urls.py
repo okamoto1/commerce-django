@@ -18,10 +18,10 @@ urlpatterns = [
     path("remove-watchlist/<int:id>", views.remove_watchlist, name="remove_watchlist"),
     path("comment/<str:title>/<int:id>", views.adding_comment , name="adding_comment"),
     path("bid/<str:title>/<int:id>", views.adding_bid , name="adding_bid"),
-    path("upload", views.upload_image, name="upload_image"),
     path("close/<int:id>", views.close_auction, name="close_auction"),
     path("auction/<str:title>/<int:id>", views.items_page, name="items_page")
 ]
 
 if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns += static(settings.MEDIA_URL,
+                          document_root=settings.MEDIA_ROOT)

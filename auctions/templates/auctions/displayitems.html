@@ -2,11 +2,12 @@
   <a class="list-group-item list-group-item-action flex-column align-items-start" href="{% url 'items_page' title=items.item id=items.id %}">
     <div class="d-flex w-100 justify-content-between">
       <h4 class="mb-1">{{ items.item }}</h4>
-      <small>3 days ago</small>
+      <small>{{ items.date.date }}</small>
     </div>
     <h6 class="mb-1">Price: ${{ items.min_bid }}</h6>
-    <p class="mb-1">Description: {{items.description}}</p>
+    <p class="mb-1">Description: {{ items.description }}</p>
     <small>Donec id elit non mi porta.</small>
+    <img src="{{ items.image.url }}" alt="connect" style="max-height:100px">
   </a>
 </div>
 <br>

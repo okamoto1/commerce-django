@@ -11,7 +11,8 @@ class Auction(models.Model):
     min_bid = models.IntegerField()
     description = models.TextField()
     active = models.BooleanField(default=True)
-    image = models.FileField()
+    image = models.ImageField()
+    date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.seller}, {self.item}, {self.description}, {self.active}, {self.min_bid}"
@@ -20,7 +21,7 @@ class Bids(models.Model):
     item_id = models.ForeignKey(Auction, on_delete=models.CASCADE, related_name="item_bids")
     buyer = models.ForeignKey(User, on_delete=models.CASCADE, related_name="comprador")
     bid_value = models.IntegerField()
-    date = models.DateTimeField()
+    date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.buyer}, lance de {self.bid_value}, no dia {self.date}"
@@ -28,6 +29,7 @@ class Bids(models.Model):
 class Comments(models.Model):
     item_id = models.ForeignKey(Auction, on_delete=models.CASCADE, related_name="item_comments")
     usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name="usuario")
+    date = models.DateTimeField(auto_now_add=True)
     comentarios = models.TextField()
 
     def __str__(self):
@@ -39,3 +41,11 @@ class Watchlist(models.Model):
 
     def __str__(self):
         return f"{self.usuario}, {self.item_id}, {self.id}"
+
+
+class Category(models.Model):
+    category = models.CharField(max_length=64)
+    itemsFromCategory = models.ManyToManyField(Auction, blank=True, related_name="itemsFromCategory")
+
+    def __str__(self):
+        return f" {self.id}, {self.category}"

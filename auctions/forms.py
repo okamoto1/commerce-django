@@ -24,9 +24,7 @@ class Listing_Form(forms.Form):
             'placeholder': 'Description'
         })
     )
-
-class Upload_Image(forms.Form):
-    file = forms.FileField()
+    image = forms.FileField(label="Choose Image")
 
 class BidForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
