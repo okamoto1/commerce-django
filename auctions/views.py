@@ -4,15 +4,15 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.core.files.storage import FileSystemStorage
 from django.shortcuts import render
 from django.urls import reverse
-from .forms import Listing_Form, BidForm, CommentsForm
+from .forms import Listing_Form, BidForm, CommentsForm, CategoryForm
 import datetime
 
-from .models import User, Auction, Bids, Comments, Watchlist
+from .models import User, Auction, Bids, Comments, Watchlist, Category
 
 
 def index(request):
     items_saved = []
-    active_auctions = Auction.objects.filter(active = True)
+    active_auctions = Auction.objects.filter(active = True).order_by('date')
     if request.user.is_authenticated:
         for saved in Watchlist.objects.filter(usuario = request.user):
             items_saved.append(saved.item_id.id)
@@ -83,14 +83,43 @@ def create_list(request):
                 image = image
             )
             return HttpResponseRedirect(reverse('index'))
+
     return render(request, "auctions/new-listing.html", {
-        "form": Listing_Form()
+        "form": Listing_Form(),
+        "categories": Category.objects.all().order_by('category')
     })
 
 
 def category(request):
-    return render(request, "auctions/category.html")
+    return render(request, "auctions/category.html", {
+        "categories": Category.objects.all().order_by('category'),
+        "form": CategoryForm()
+    })
 
+def show_category_items(request, title):
+    category = Category.objects.get(category = title)
+    items = category.category_items.all()
+    return render(request, "auctions/category-item.html",{
+        "items": items,
+    })
+
+def create_category(request):
+    if request.method == "POST":
+        form = CategoryForm(request.POST)
+        if form.is_valid():
+            category_name = form.cleaned_data["category"]
+            if Category.objects.filter(category = category_name):
+                message = 'Category already exist'
+                return render(request, "auctions/category.html", {
+                    "categories": Category.objects.all(),
+                    "message": message,
+                    "form": CategoryForm()
+                })
+            else:
+                create_category = Category.objects.create(
+                    category = category_name
+                )
+    return HttpResponseRedirect(reverse("category"))
 
 def items_page(request, title, id):
     details = Auction.objects.filter(id = id)

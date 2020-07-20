@@ -5,6 +5,12 @@ from django.db import models
 class User(AbstractUser):
     pass
 
+class Category(models.Model):
+    category = models.CharField(max_length=64)
+
+    def __str__(self):
+        return f" {self.id}, {self.category}"
+
 class Auction(models.Model):
     seller = models.ForeignKey(User, on_delete=models.CASCADE, related_name="vendedor")
     item = models.CharField(max_length=100)
@@ -13,6 +19,7 @@ class Auction(models.Model):
     active = models.BooleanField(default=True)
     image = models.ImageField()
     date = models.DateTimeField(auto_now_add=True)
+    selectcategory = models.ManyToManyField(Category, blank=True, related_name="category_items")
 
     def __str__(self):
         return f"{self.seller}, {self.item}, {self.description}, {self.active}, {self.min_bid}"
@@ -41,11 +48,3 @@ class Watchlist(models.Model):
 
     def __str__(self):
         return f"{self.usuario}, {self.item_id}, {self.id}"
-
-
-class Category(models.Model):
-    category = models.CharField(max_length=64)
-    itemsFromCategory = models.ManyToManyField(Auction, blank=True, related_name="itemsFromCategory")
-
-    def __str__(self):
-        return f" {self.id}, {self.category}"

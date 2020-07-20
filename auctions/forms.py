@@ -25,6 +25,7 @@ class Listing_Form(forms.Form):
         })
     )
     image = forms.FileField(label="Choose Image")
+    
 
 class BidForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
@@ -45,3 +46,10 @@ class CommentsForm(forms.Form):
             'placeholder': 'Place your comment here'
         })
     )
+
+class CategoryForm(forms.Form):
+    category = forms.CharField(label="Create a category",
+    widget=forms.TextInput(attrs={
+        'class': 'form-control',
+        'placeholder': "Category"
+    }))

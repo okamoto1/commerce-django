@@ -1,14 +1,20 @@
 {% extends "auctions/layout.html" %}
 
 {% block body %}
-  {% if form %}
-    <div class="form-group">
-      <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        {{ form }}
-        <br>
-        <button type="submit" class="btn btn-outline-primary"name="button">Submit</button>
-      </form>
-    </div>
-  {% endif %}
+  <div class="form-group">
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      {{ form }}
+      <br>
+      <select class="form-control" name="category">
+        <option selected>Select a category</option>
+        {% for category in categories %}
+          <option value="{{category.category}}">{{category.category}}</option>
+        {% endfor %}
+      </select>
+      <br>
+      <button type="submit" class="btn btn-outline-primary" name="button">Submit</button>
+    </form>
+  </div>
+  </form>
 {% endblock %}

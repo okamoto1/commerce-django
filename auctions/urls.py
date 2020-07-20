@@ -19,6 +19,8 @@ urlpatterns = [
     path("comment/<str:title>/<int:id>", views.adding_comment , name="adding_comment"),
     path("bid/<str:title>/<int:id>", views.adding_bid , name="adding_bid"),
     path("category", views.category, name="category"),
+    path("category/<str:title>", views.show_category_items, name="show_category_items"),
+    path("create/category", views.create_category, name="create_category"),
     path("close/<int:id>", views.close_auction, name="close_auction"),
     path("auction/<str:title>/<int:id>", views.items_page, name="items_page")
 ]

@@ -6,4 +6,5 @@ admin.site.register(User)
 admin.site.register(Auction)
 admin.site.register(Bids)
 admin.site.register(Comments)
-# Register your models here.
+admin.site.register(Watchlist)
+admin.site.register(Category)

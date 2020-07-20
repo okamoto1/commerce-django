@@ -4,14 +4,14 @@
     <h2>Active Listings</h2>
     <div class="list-group">
       {% for items in all_auctions %}
-      {% include "auctions/displayitems.html" %}
-        {% if user.is_authenticated %}
-          {% if items.id in watchlist %}
-              <small><a href="{% url 'remove_watchlist' id=items.id %}">Remove From Watchlist</a></small>
-          {% else %}
-              <small><a href="{% url 'add_watchlist' id=items.id %}">Add to Watchlist</a></small>
+        {% include "auctions/displayitems.html" %}
+          {% if user.is_authenticated %}
+            {% if items.id in watchlist %}
+                <small><a href="{% url 'remove_watchlist' id=items.id %}">Remove From Watchlist</a></small>
+            {% else %}
+                <small><a href="{% url 'add_watchlist' id=items.id %}">Add to Watchlist</a></small>
+            {% endif %}
           {% endif %}
-        {% endif %}
-      <br>
+        <br>
       {% endfor %}
 {% endblock %}

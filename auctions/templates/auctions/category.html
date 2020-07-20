@@ -1,6 +1,18 @@
 {% extends "auctions/layout.html" %}
 
 {% block body %}
-  categorias
-  add categorias
+  <h2>Categories</h2>
+  <ul>
+    {% for category in categories %}
+      <li><a href="{% url 'show_category_items' title=category.category %}">{{ category.category }}</a></li>
+    {% endfor %}
+  </ul>
+  <div class="form-group">
+    <form action="{% url 'create_category' %}" method="post">
+      {% csrf_token %}
+      {{ form }}<br>
+      <button type="submit" class="btn btn-outline-primary" name="button">Submit</button>
+    </form>
+  </div>
+  {{ message }}
 {% endblock %}
