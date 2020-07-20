@@ -21,7 +21,7 @@
                 <a class="nav-link" href="{% url 'index' %}">Active Listings</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="#">Category</a>
+                <a class="nav-link" href="{% url 'category' %}">Category</a>
             </li>
             {% if user.is_authenticated %}
                 <li class="nav-item">

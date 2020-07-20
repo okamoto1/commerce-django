@@ -88,6 +88,10 @@ def create_list(request):
     })
 
 
+def category(request):
+    return render(request, "auctions/category.html")
+
+
 def items_page(request, title, id):
     details = Auction.objects.filter(id = id)
     filter = Auction.objects.get(id = id)
