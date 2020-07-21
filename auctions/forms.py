@@ -25,18 +25,15 @@ class Listing_Form(forms.Form):
         })
     )
     image = forms.FileField(label="Choose Image")
-    
-
-class BidForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super(BidForm, self).__init__(*args, **kwargs)
-        self.fields['bid_value'].widget.attrs['min'] = 50
-
-    class Meta:
-        model = Bids
-        fields = ['bid_value']
 
 
+class BidForm(forms.Form):
+    bid_value = forms.IntegerField(label="",
+        widget=forms.NumberInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Bid'
+        })
+    )
 
 class CommentsForm(forms.Form):
     comentarios = forms.CharField(label="",

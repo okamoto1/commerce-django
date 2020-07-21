@@ -1,10 +1,9 @@
 {% extends "auctions/layout.html" %}
-{% load bootstrap %}
 
 {% block body %}
   {% for items in items %}
     <h2>Listing: {{ items.item }} </h2>
-    <h4>$50</h4>
+    <h4>Current Prince: ${{ value }}</h4>
     <img src="{{ items.image.url }}" style="height: 400px" class="timg-fluid img-thumbnail rounded mx-auto d-block">
     <h6>Description:</h6>
     <small>
@@ -12,12 +11,23 @@
         <p>{{ items.description }}</p>
       </div>
     </small>
-    {% if user.is_authenticated  %}
-      <form method='post' action="{% url 'adding_bid' title=items.item id=items.id %}">
-        {% csrf_token %}
-        {{ BidForm|bootstrap }}
-        <button type="submit" class="btn btn-outline-primary" name="button">Place Bid</button>
-      </form>
+    {% if edit %}
+    <ol>
+      {% for bid in log_bids %}
+        <li>{{ bid }}</li>
+      {% endfor %}
+    </ol>
+       close auction
+    {% else %}
+      {{ log_bids }} bid(s) so far
+      {% if user.is_authenticated  %}
+        <form method='post' action="{% url 'adding_bid' title=items.item id=items.id %}">
+          {% csrf_token %}
+          {{ BidForm }}
+          <h6 style='color: red'>{{ message }}</h6>
+          <button type="submit" class="btn btn-outline-primary" name="button">Place Bid</button>
+        </form>
+      {% endif %}
     {% endif %}
     <br>
     Details:

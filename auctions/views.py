@@ -1,11 +1,12 @@
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.core.files.storage import FileSystemStorage
 from django.shortcuts import render
 from django.urls import reverse
 from .forms import Listing_Form, BidForm, CommentsForm, CategoryForm
-import datetime
+
 
 from .models import User, Auction, Bids, Comments, Watchlist, Category
 
@@ -65,7 +66,7 @@ def register(request):
     else:
         return render(request, "auctions/register.html")
 
-
+@login_required
 def create_list(request):
     if request.method == "POST":
         form = Listing_Form(request.POST, request.FILES)
@@ -108,6 +109,7 @@ def show_category_items(request, title):
         "items": items,
     })
 
+@login_required
 def create_category(request):
     if request.method == "POST":
         form = CategoryForm(request.POST)
@@ -131,17 +133,28 @@ def items_page(request, title, id):
     filter = Auction.objects.get(id = id)
     seller = details.values('seller')
     author = User.objects.filter(pk__in=seller)
+    query = Bids.objects.filter(item_id = filter)
+    if Bids.objects.filter(item_id = filter):
+        actual_bid = Bids.objects.filter(item_id = filter).latest('bid_value').bid_value
+    else:
+        actual_bid = Auction.objects.get(id = id).min_bid
     if author[0] == request.user:
         edit = True
-        log_bids = Bids.objects.filter(item_id = filter)
+        log_bids = query
+    else:
+        edit = False
+        log_bids = query.count()
     return render(request, "auctions/items-page.html", {
         "BidForm": BidForm(),
         "CommentForm": CommentsForm(),
+        "value": actual_bid,
         "comments": Comments.objects.filter(item_id = filter),
-        "items": details
+        "items": details,
+        "log_bids": log_bids,
+        "edit" : edit
     })
 
-
+@login_required
 def adding_comment(request, title, id):
     filter = Auction.objects.get(id = id)
     if request.method == "POST":
@@ -155,31 +168,47 @@ def adding_comment(request, title, id):
             )
     return HttpResponseRedirect(reverse("items_page", args=(title, id,)))
 
-
+@login_required
 def adding_bid(request, title, id):
     filter = Auction.objects.get(id = id)
+    details = Auction.objects.filter(id = id)
+    if Bids.objects.filter(item_id = filter):
+        actual_bid = Bids.objects.filter(item_id = filter).latest('bid_value').bid_value
+    else:
+        actual_bid = Auction.objects.get(id = id).min_bid
     if request.method == "POST":
         form = BidForm(request.POST)
         if form.is_valid():
             bid_value = form.cleaned_data["bid_value"]
-            Bids.objects.create(
-                buyer = request.user,
-                bid_value = bid_value,
-                item_id = filter,
-            )
+            if bid_value <= actual_bid:
+                return render(request, "auctions/items-page.html", {
+                    "BidForm": BidForm(),
+                    "CommentForm": CommentsForm(),
+                    "value": actual_bid,
+                    "comments": Comments.objects.filter(item_id = filter),
+                    "items": details,
+                    "message" : 'Invalid value'
+                })
+            else:
+                Bids.objects.create(
+                    buyer = request.user,
+                    bid_value = bid_value,
+                    item_id = filter,
+                )
     return HttpResponseRedirect(reverse("items_page", args=(title, id,)))
 
+@login_required
 def add_watchlist(request, id):
     query = Auction.objects.get(pk = id)
     Watchlist.objects.create(usuario = request.user, item_id = query)
     return HttpResponseRedirect(reverse("index"))
 
-
+@login_required
 def remove_watchlist(request, id):
     query = Watchlist.objects.filter(item_id = id).delete()
     return HttpResponseRedirect(reverse("index"))
 
-
+@login_required
 def watchlist(request):
     show_favitems = Watchlist.objects.filter(usuario = request.user)
     if show_favitems:
@@ -191,7 +220,7 @@ def watchlist(request):
             'mensagem': 'Empty'
         })
 
-
+@login_required
 def close_auction(request, id):
     query = Auction.objects.filter(id = id).update(active = False)
     return HttpResponseRedirect(reverse("index"))
