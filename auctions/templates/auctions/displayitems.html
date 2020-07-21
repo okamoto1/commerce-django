@@ -1,13 +1,13 @@
 <div class="list-group">
   <a class="list-group-item list-group-item-action flex-column align-items-start" href="{% url 'items_page' title=items.item id=items.id %}">
-    <div class="d-flex w-100 justify-content-between">
-      <h4 class="mb-1">{{ items.item }}</h4>
-      <small>{{ items.date.date }}</small>
+    <img src="{{ items.image.url }}" alt="connect" style="max-height:140px" class="rounded float-left ">
+    <div class="d-flex justify-content-between">
+      <h4 class="mb-3">{{ items.item }}</h4>
+      <small>Created: {{ items.date.date }}</small>
     </div>
-    <h6 class="mb-1">Price: ${{ items.min_bid }}</h6>
-    <p class="mb-1">Description: {{ items.description }}</p>
-    <small>Donec id elit non mi porta.</small>
-    <img src="{{ items.image.url }}" alt="connect" style="max-height:100px">
+    <h6 class="mb-2">Price: ${{ items.min_bid }}</h6>
+    <p class="mb-0">Description: {{ items.description }}</p>
+    <small>Category: {{ items.selectcategory }}</small>
   </a>
 </div>
 <br>

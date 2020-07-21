@@ -2,6 +2,7 @@
 
 
 {% block body %}
+  <h2> {{ category.category|title }}</h2>
   {% for items in items%}
     {% include "auctions/displayitems.html" %}
   {% endfor %}

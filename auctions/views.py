@@ -12,7 +12,7 @@ from .models import User, Auction, Bids, Comments, Watchlist, Category
 
 def index(request):
     items_saved = []
-    active_auctions = Auction.objects.filter(active = True).order_by('date')
+    active_auctions = Auction.objects.filter(active = True).order_by('-date')
     if request.user.is_authenticated:
         for saved in Watchlist.objects.filter(usuario = request.user):
             items_saved.append(saved.item_id.id)
@@ -70,6 +70,7 @@ def create_list(request):
     if request.method == "POST":
         form = Listing_Form(request.POST, request.FILES)
         if form.is_valid():
+            #create auction
             title = form.cleaned_data["title"]
             description = form.cleaned_data["description"]
             init_bid = form.cleaned_data["init_bid"]
@@ -82,8 +83,11 @@ def create_list(request):
                 min_bid = init_bid,
                 image = image
             )
+            #select category
+            category_name = request.POST["category"]
+            category = Category.objects.get(category = category_name)
+            listing.selectcategory.add(category)
             return HttpResponseRedirect(reverse('index'))
-
     return render(request, "auctions/new-listing.html", {
         "form": Listing_Form(),
         "categories": Category.objects.all().order_by('category')
@@ -100,6 +104,7 @@ def show_category_items(request, title):
     category = Category.objects.get(category = title)
     items = category.category_items.all()
     return render(request, "auctions/category-item.html",{
+        "category": category,
         "items": items,
     })
 
@@ -117,7 +122,7 @@ def create_category(request):
                 })
             else:
                 create_category = Category.objects.create(
-                    category = category_name
+                    category = category_name.capitalize()
                 )
     return HttpResponseRedirect(reverse("category"))
 
