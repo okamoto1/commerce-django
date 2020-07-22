@@ -87,8 +87,9 @@ def create_list(request):
             )
             #select category
             category_name = request.POST["category"]
-            category = Category.objects.get(category = category_name)
-            listing.selectcategory.add(category)
+            if category_name != 'Select a category':
+                category = Category.objects.get(category = category_name)
+                listing.selectcategory.add(category)
             return HttpResponseRedirect(reverse('index'))
     return render(request, "auctions/new-listing.html", {
         "form": Listing_Form(),
