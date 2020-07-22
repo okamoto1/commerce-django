@@ -5,5 +5,10 @@
   <h2> {{ category.category|title }}</h2>
   {% for items in items%}
     {% include "auctions/displayitems.html" %}
+      {% if items.id in watchlist %}
+          <small><a href="{% url 'remove_watchlist' id=items.id %}">Remove From Watchlist</a></small>
+      {% else %}
+          <small><a href="{% url 'add_watchlist' id=items.id %}">Add to Watchlist</a></small>
+      {% endif %}
   {% endfor %}
 {% endblock %}

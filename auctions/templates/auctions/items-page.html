@@ -1,6 +1,9 @@
 {% extends "auctions/layout.html" %}
 
 {% block body %}
+  {% if winner %}
+    <h4 class="text-success">Congratulations {{winner}}, you won the auction</h4>
+  {% endif %}
   {% for items in items %}
     <h2>Listing: {{ items.item }} </h2>
     <h4>Current Prince: ${{ value }}</h4>
@@ -17,10 +20,10 @@
         <li>{{ bid }}</li>
       {% endfor %}
     </ol>
-       close auction
+    <a href="{% url 'close_auction' id=items.id%}">Close Auction</a><br>
     {% else %}
       {{ log_bids }} bid(s) so far
-      {% if user.is_authenticated  %}
+      {% if user.is_authenticated and items.active %}
         <form method='post' action="{% url 'adding_bid' title=items.item id=items.id %}">
           {% csrf_token %}
           {{ BidForm }}
@@ -37,9 +40,9 @@
       <li>Initial Value: ${{ items.min_bid }}</li>
       <li>Created: {{ items.date }}</li>
       {% if items.active == True %}
-        <li>Active</li>
+        <li>Status: Active</li>
       {% else %}
-        <li>Closed</li>
+        <li>Status: Closed</li>
       {% endif %}
     </ul>
     <p>Comments</p>

@@ -5,6 +5,7 @@
   {% if saved_items %}
     {% for item in saved_items %}
       {% include "auctions/displayitems.html" with items=item.item_id%}
+      <small><a href="{% url 'remove_watchlist' id=item.item_id.id %}">Remove From Watchlist</a></small>
     {% endfor %}
   {% else %}
     {{ mensagem }}

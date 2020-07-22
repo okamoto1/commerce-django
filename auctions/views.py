@@ -5,21 +5,22 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.core.files.storage import FileSystemStorage
 from django.shortcuts import render
 from django.urls import reverse
-from .forms import Listing_Form, BidForm, CommentsForm, CategoryForm
 
+from .functions import watchlist_items, actual_bid, seller_or_buyer, details_and_comments, declare_winner
+from .forms import Listing_Form, BidForm, CommentsForm, CategoryForm
 
 from .models import User, Auction, Bids, Comments, Watchlist, Category
 
 
 def index(request):
-    items_saved = []
     active_auctions = Auction.objects.filter(active = True).order_by('-date')
     if request.user.is_authenticated:
-        for saved in Watchlist.objects.filter(usuario = request.user):
-            items_saved.append(saved.item_id.id)
+        return render(request, "auctions/index.html", {
+            'all_auctions': active_auctions,
+            'watchlist': watchlist_items(request.user),
+        })
     return render(request, "auctions/index.html", {
         'all_auctions': active_auctions,
-        'watchlist': items_saved,
     })
 
 
@@ -107,6 +108,7 @@ def show_category_items(request, title):
     return render(request, "auctions/category-item.html",{
         "category": category,
         "items": items,
+        'watchlist': watchlist_items(request.user),
     })
 
 @login_required
@@ -129,29 +131,29 @@ def create_category(request):
     return HttpResponseRedirect(reverse("category"))
 
 def items_page(request, title, id):
-    details = Auction.objects.filter(id = id)
-    filter = Auction.objects.get(id = id)
-    seller = details.values('seller')
-    author = User.objects.filter(pk__in=seller)
-    query = Bids.objects.filter(item_id = filter)
-    if Bids.objects.filter(item_id = filter):
-        actual_bid = Bids.objects.filter(item_id = filter).latest('bid_value').bid_value
-    else:
-        actual_bid = Auction.objects.get(id = id).min_bid
-    if author[0] == request.user:
-        edit = True
-        log_bids = query
-    else:
-        edit = False
-        log_bids = query.count()
+    user_type = seller_or_buyer(id, request.user)
+    item_stuff = details_and_comments(id)
+    if not Auction.objects.get(id = id).active:
+        winner = declare_winner(id, request.user)
+        if winner == request.user:
+            return render(request, "auctions/items-page.html", {
+                "BidForm": BidForm(),
+                "CommentForm": CommentsForm(),
+                "value": actual_bid(id),
+                "comments": item_stuff['comments'],
+                "items": item_stuff['details'],
+                "log_bids": user_type['log_bids'],
+                "edit" : user_type['edit'],
+                "winner": winner
+            })
     return render(request, "auctions/items-page.html", {
         "BidForm": BidForm(),
         "CommentForm": CommentsForm(),
-        "value": actual_bid,
-        "comments": Comments.objects.filter(item_id = filter),
-        "items": details,
-        "log_bids": log_bids,
-        "edit" : edit
+        "value": actual_bid(id),
+        "comments": item_stuff['comments'],
+        "items": item_stuff['details'],
+        "log_bids": user_type['log_bids'],
+        "edit" : user_type['edit'],
     })
 
 @login_required
@@ -171,22 +173,18 @@ def adding_comment(request, title, id):
 @login_required
 def adding_bid(request, title, id):
     filter = Auction.objects.get(id = id)
-    details = Auction.objects.filter(id = id)
-    if Bids.objects.filter(item_id = filter):
-        actual_bid = Bids.objects.filter(item_id = filter).latest('bid_value').bid_value
-    else:
-        actual_bid = Auction.objects.get(id = id).min_bid
+    item_stuff = details_and_comments(id)
     if request.method == "POST":
         form = BidForm(request.POST)
         if form.is_valid():
             bid_value = form.cleaned_data["bid_value"]
-            if bid_value <= actual_bid:
+            if bid_value <= actual_bid(id):
                 return render(request, "auctions/items-page.html", {
                     "BidForm": BidForm(),
                     "CommentForm": CommentsForm(),
-                    "value": actual_bid,
-                    "comments": Comments.objects.filter(item_id = filter),
-                    "items": details,
+                    "value": actual_bid(id),
+                    "comments": item_stuff['comments'],
+                    "items": item_stuff['details'],
                     "message" : 'Invalid value'
                 })
             else:
@@ -222,5 +220,5 @@ def watchlist(request):
 
 @login_required
 def close_auction(request, id):
-    query = Auction.objects.filter(id = id).update(active = False)
+    update_status = Auction.objects.filter(id = id).update(active = False)
     return HttpResponseRedirect(reverse("index"))
