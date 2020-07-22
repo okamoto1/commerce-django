@@ -1,4 +1,4 @@
-Django==3.0.6
+Django==3.0.7
 Pillow==7.2.0
 gunicorn==20.0.4
 WhiteNoise==5.1.0
