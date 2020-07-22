@@ -1,1 +1,1 @@
-web: uvicorn --host=0.0.0.0 --port=$PORT project2-commerce.auctions:app
+web: gunicorn stats.wsgi --log-file -
