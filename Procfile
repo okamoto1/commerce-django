@@ -1,1 +1,1 @@
-web:gunicorn stats.wsgi --log-file -
+web:gunicorn commerce.wsgi --log-file -
